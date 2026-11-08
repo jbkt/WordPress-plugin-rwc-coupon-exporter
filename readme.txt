@@ -2,13 +2,14 @@
 Contributors: reliefcreation
 Tags: woocommerce, coupons, export, csv
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Requires Plugins: woocommerce
+Stable tag: 1.3.4
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 3.0
-WC tested up to: 8.5
+WC tested up to: 11.2
 
 Export WooCommerce coupons to a CSV file easily and efficiently.
 
@@ -90,7 +91,7 @@ The plugin provides several filters to extend its functionality:
 * `rwc_coupon_exporter_csv_row` - Modify row data before export
   ```php
   add_filter('rwc_coupon_exporter_csv_row', function($row, $wc_coupon) {
-      $row[] = get_post_meta($wc_coupon->get_id(), 'my_custom_field', true);
+      $row[] = $wc_coupon->get_meta('my_custom_field', true);
       return $row;
   }, 10, 2);
   ```
@@ -100,6 +101,14 @@ The plugin provides several filters to extend its functionality:
 1. Export coupons page in the WooCommerce menu
 
 == Changelog ==
+
+= 1.3.3 =
+* Added compatibility declaration for WooCommerce High-Performance Order Storage (HPOS) and Cart/Checkout Blocks
+* Added `Requires Plugins: woocommerce` header for native WordPress plugin dependency support
+* Updated compatibility for WooCommerce 11.2 and WordPress 7.1
+* Fixed textdomain loading timing for WordPress 6.7+ compatibility
+* Added PHP 8.4+ compatibility for CSV generation (`fputcsv` escape parameter)
+* Improved batch processing and output buffer cleanup during CSV export
 
 = 1.3.2 =
 * Fixed HTML code appearing in exported CSV files
@@ -121,6 +130,12 @@ The plugin provides several filters to extend its functionality:
 * Code refactoring for better maintainability
 
 == Upgrade Notice ==
+
+= 1.3.4 =
+Adds full compatibility with the latest versions of WooCommerce.
+
+= 1.3.3 =
+Adds full compatibility with the latest versions of WooCommerce (including HPOS and Cart/Checkout Blocks), WordPress, and PHP 8.4+.
 
 = 1.3.2 =
 This version fixes an issue where HTML code could appear in exported CSV files and improves the overall export process.

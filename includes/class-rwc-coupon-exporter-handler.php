@@ -6,11 +6,16 @@
  * @since 1.3.2
  */
 
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class RWC_Coupon_Exporter_Handler {
     /**
      * Logger instance
      *
-     * @var WC_Logger
+     * @var WC_Logger|null
      */
     private $logger;
 
@@ -20,7 +25,7 @@ class RWC_Coupon_Exporter_Handler {
      * @since 1.3.1
      */
     public function __construct() {
-        $this->logger = wc_get_logger();
+        $this->logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
     }
 
     /**
@@ -97,14 +102,14 @@ class RWC_Coupon_Exporter_Handler {
      */
     private function export_coupons($coupons) {
         try {
-            // Clean output buffer
-            if (ob_get_level()) {
+            // Clean all output buffers
+            while (ob_get_level()) {
                 ob_end_clean();
             }
 
             // Set headers for CSV download
-            header('Content-Type: text/csv');
-            header('Content-Disposition: attachment; filename=woocommerce-coupons-' . date('Y-m-d-His') . '.csv');
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=woocommerce-coupons-' . gmdate('Y-m-d-His') . '.csv');
             header('Pragma: no-cache');
             header('Expires: 0');
 
@@ -116,13 +121,19 @@ class RWC_Coupon_Exporter_Handler {
 
             // Get and write headers
             $headers = array_values($this->get_csv_headers());
-            fputcsv($output, $headers);
+            fputcsv($output, $headers, ',', '"', '\\');
 
-            // Write coupon data
-            foreach ($coupons as $coupon_id) {
-                $row = $this->get_coupon_data($coupon_id);
-                if ($row) {
-                    fputcsv($output, $row);
+            // Process coupons in batches of 100 to prevent memory issues
+            $batches = array_chunk($coupons, 100);
+            foreach ($batches as $batch) {
+                foreach ($batch as $coupon_id) {
+                    $row = $this->get_coupon_data($coupon_id);
+                    if ($row) {
+                        fputcsv($output, $row, ',', '"', '\\');
+                    }
+                }
+                if (function_exists('wp_cache_flush_runtime')) {
+                    wp_cache_flush_runtime();
                 }
             }
 
@@ -191,7 +202,7 @@ class RWC_Coupon_Exporter_Handler {
         try {
             $wc_coupon = new WC_Coupon($coupon_id);
             
-            if (!$wc_coupon || is_wp_error($wc_coupon)) {
+            if (!$wc_coupon || is_wp_error($wc_coupon) || !$wc_coupon->get_id()) {
                 return false;
             }
             

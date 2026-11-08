@@ -6,6 +6,11 @@
  * @since 1.3.2
  */
 
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class RWC_Coupon_Exporter {
     /**
      * Plugin instance
@@ -64,7 +69,7 @@ class RWC_Coupon_Exporter {
         }
 
         // Check WooCommerce version if it's active
-        if (class_exists('WooCommerce')) {
+        if (class_exists('WooCommerce') && defined('WC_VERSION')) {
             if (version_compare(WC_VERSION, '3.0', '<')) {
                 add_action('admin_notices', function() {
                     /* translators: %s: Required minimum WooCommerce version number */

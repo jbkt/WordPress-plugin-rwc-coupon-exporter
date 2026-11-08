@@ -6,6 +6,11 @@
  * @since 1.3.2
  */
 
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class RWC_Coupon_Exporter_Admin {
     /**
      * Initialize admin functionality
